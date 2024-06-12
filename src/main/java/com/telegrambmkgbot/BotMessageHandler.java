@@ -69,36 +69,6 @@ public class BotMessageHandler {
         return chat;
     }
 
-    public void sendMessage(BotMessageObject msg) {
-        try {
-            var apiUrl = String.format(API_URL_TEMPLATE, API_TOKEN, msg.chatId, msg.message, PARSE_MODE);
-            URL url = new URL(apiUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                var response = new StringBuilder();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                // Print the response from the API
-                System.out.println("Response: " + response.toString());
-            } else {
-                System.out.println("GET request not worked");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     // public String terakhir(String json){
     //     System.out.println("Received request body: " + json);
     //     ObjectMapper mapper = new ObjectMapper();
@@ -253,6 +223,37 @@ public class BotMessageHandler {
         return msg;
     }
 
+    public void sendMessage(BotMessageObject msg) {
+        try {
+            var apiUrl = String.format(API_URL_TEMPLATE, API_TOKEN, msg.chatId, msg.message, PARSE_MODE);
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            String inputLine;
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                var response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // Print the response from the API
+                System.out.println("Response: " + response.toString());
+            } else {
+                var responseBody = connection.getResponseMessage();
+                System.out.println("GET request not worked" + responseBody);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getData(String link){
         try {
             // Create a URL object
@@ -292,7 +293,5 @@ public class BotMessageHandler {
         }
         return "";
     }
-    
 
-    
 }

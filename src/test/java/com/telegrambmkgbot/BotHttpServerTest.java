@@ -3,18 +3,17 @@ package com.telegrambmkgbot;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-/**
- * Unit test for simple App.
- */
+@RunWith(Parameterized.class)
 public class BotHttpServerTest 
 {
-    /**
-     * Rigorous Test :-)
-     */
     @Test
     public void shouldAnswerWithTrue()
     {
         assertTrue( true );
     }
+
+    
 }
