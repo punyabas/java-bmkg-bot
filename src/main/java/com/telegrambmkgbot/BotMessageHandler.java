@@ -103,6 +103,19 @@ public class BotMessageHandler {
         
     // }
 
+    // BISA DIPAKAI NANTI
+    // public String[] dataset (String json) throws JsonProcessingException {
+    //     System.out.println("Received request body: " + json);
+    //     ObjectMapper mapper = new ObjectMapper();
+    //     JsonNode node;
+    //     node = mapper.readTree(json);
+    //     String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
+    //     String time = node.get("Infogempa").get("gempa").get("Jam").asText();
+    //     String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
+    //     String depth = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
+    //     return new String[] {date, time, locs, depth};
+    // }
+
     public String kekuatan(String json){
         System.out.println("Received request body: " + json);
         ObjectMapper mapper = new ObjectMapper();
@@ -112,6 +125,7 @@ public class BotMessageHandler {
         }  catch (Exception e) {
             return "gagal mendapatkan data gempa";
         }
+
         String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
         String time = node.get("Infogempa").get("gempa").get("Jam").asText();
         String loc = node.get("Infogempa").get("gempa").get("Wilayah").asText();
@@ -136,7 +150,7 @@ public class BotMessageHandler {
            msg = msg + "gempa bumi hebat, menghancurkan komunitas di dekat pusat gempa.";
         }
         else {
-           msg = msg + "gempa bumi kecil tidak terasa.";
+           msg = msg + "gempa bumi sangat kecil, tidak terasa.";
         }
         return msg;
     }
@@ -150,6 +164,7 @@ public class BotMessageHandler {
         }  catch (Exception e) {
             return "gagal mendapatkan data gempa";
         }
+
         String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
         String time = node.get("Infogempa").get("gempa").get("Jam").asText();
         String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
@@ -187,7 +202,7 @@ public class BotMessageHandler {
         return msg;
     }
 
-    public String kedalaman(String json){
+    public String kedalaman(String json) {
         System.out.println("Received request body: " + json);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node;
@@ -213,7 +228,7 @@ public class BotMessageHandler {
         else if ( 70 < deep && deep <= 300) {
             msg = msg + "gempa bumi sedang.";
         }
-        else if ( deep > 700) {
+        else if ( deep > 300) {
             msg = msg + "gempa bumi dalam.";
         }
         else {
