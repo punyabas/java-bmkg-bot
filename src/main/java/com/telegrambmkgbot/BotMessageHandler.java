@@ -201,14 +201,14 @@ public class BotMessageHandler {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double deg = Math.toDegrees(c); // convert to degree
 
-        if ( 0 <= deg && deg < 10 ) {
+        if ( 0 <= deg && deg < 1 ) {
             msg = msg + "gempa bumi lokal, relatif dari lokasi anda.";
         }
-        else if ( 10 <= deg && deg < 20) {
+        else if ( 1 <= deg && deg < 10) {
             msg = msg + "gempa bumi regional, relatif dari lokasi anda.";
         }
-        else if ( deg >= 20) {
-            msg = msg + "gempa bumi jauh, relatif dari lokasi anda.";
+        else if ( deg >= 10) {
+            msg = msg + "gempa bumi teleseismik, relatif dari lokasi anda.";
         }
         else {
             msg = msg + "gempa bumi yang tidak terklasifikasi.";
@@ -237,13 +237,13 @@ public class BotMessageHandler {
         String deepString = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
         deepString = deepString.replaceAll("[^0-9]", "");
         double deep =  Double.parseDouble(deepString);
-        if (  0 < deep && deep < 70) {
+        if (  0 < deep && deep <= 70) {
             msg = msg + "gempa bumi dangkal.";
         }
-        else if ( 70 <= deep && deep < 300) {
+        else if ( 70 < deep && deep <= 300) {
             msg = msg + "gempa bumi sedang.";
         }
-        else if ( 300 <= deep && deep < 700) {
+        else if ( deep > 700) {
             msg = msg + "gempa bumi dalam.";
         }
         else {
