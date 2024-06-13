@@ -22,7 +22,7 @@ public class BotMessageMagnitudeDataTest {
         this.expected = c;
     }
 
-    @Parameterized.Parameters(name = "{index} -> Gempa berkekuatan {1} SR termasuk {2}")
+    @Parameterized.Parameters(name = "{index} -> Gempa berkekuatan {1} M termasuk {2}")
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][] {
                 {

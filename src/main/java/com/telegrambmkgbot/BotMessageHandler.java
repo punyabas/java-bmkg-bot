@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,12 +18,11 @@ public class BotMessageHandler {
     public BotMessageObject handleMessage(JsonNode node) {
         // Handle update message
         // Get data from decoded update object
-        // System.out.println("THIS: ");
         String conversation = "Reply pesan ini dengan data lokasi anda";
         JsonNode messageNode = node.path("message");
         String text;
         String msg;
-        Integer chatId = node.get("message").get("chat").get("id").asInt();
+        Long chatId = node.get("message").get("chat").get("id").asLong();
         if (messageNode.has("text")) {
             text = node.get("message").get("text").asText();
         } else if (messageNode.has("location") && messageNode.has("reply_to_message") && conversation.equals(messageNode.get("reply_to_message").get("text").asText())) {
@@ -104,36 +104,32 @@ public class BotMessageHandler {
     // }
 
     // BISA DIPAKAI NANTI
-    // public String[] dataset (String json) throws JsonProcessingException {
-    //     System.out.println("Received request body: " + json);
-    //     ObjectMapper mapper = new ObjectMapper();
-    //     JsonNode node;
-    //     node = mapper.readTree(json);
-    //     String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
-    //     String time = node.get("Infogempa").get("gempa").get("Jam").asText();
-    //     String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
-    //     String depth = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
-    //     return new String[] {date, time, locs, depth};
-    // }
-
-    public String kekuatan(String json){
+    public String[] dataset (String json) throws JsonProcessingException {
         System.out.println("Received request body: " + json);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node;
-        try{
-            node = mapper.readTree(json);
-        }  catch (Exception e) {
-            return "gagal mendapatkan data gempa";
-        }
-
+        node = mapper.readTree(json);
         String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
         String time = node.get("Infogempa").get("gempa").get("Jam").asText();
-        String loc = node.get("Infogempa").get("gempa").get("Wilayah").asText();
+        String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
         String depth = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
+        String mag =  node.get("Infogempa").get("gempa").get("Magnitude").asText();
+        String loc =  node.get("Infogempa").get("gempa").get("Coordinates").asText();
 
-        String msg = "Telah terjadi gempa pada tanggal "+ date + " pukul " + time + ", dengan pusat gempa berada di "+ loc;
-        double mag =  Double.parseDouble(node.get("Infogempa").get("gempa").get("Magnitude").asText());
-        msg = msg + ". Kekuatan gempa adalah " +mag+ " SR, dengan kedalaman " + depth + ". Berdasarkan magnitude, gempa bumi yang terjadi termasuk ";
+        return new String[] {date, time, locs, depth, mag, loc};
+    }
+
+    public String kekuatan(String json){
+        String[] data;
+        try{
+            data = this.dataset(json); 
+        }  catch (Exception e) {
+            return "gagal mendapatkan data gempa";
+        }       
+
+        String msg = "Telah terjadi gempa pada tanggal "+ data[0] + " pukul " + data[1] + ", dengan pusat gempa berada di "+ data[2];
+        double mag =  Double.parseDouble(data[4]);
+        msg = msg + ". Kekuatan gempa adalah " +mag+ "M. Berdasarkan magnitude, gempa bumi yang terjadi termasuk ";
         if ( 2.54 <= mag && mag < 5.5) {
             msg = msg + "gempa bumi kecil, kerusakan minim.";
         }
@@ -156,24 +152,15 @@ public class BotMessageHandler {
     }
 
     public String zonasi(String json, LocationObject loc){
-        System.out.println("Received request body: " + json);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node;
+        String[] data;
         try{
-            node = mapper.readTree(json);
+            data = this.dataset(json); 
         }  catch (Exception e) {
             return "gagal mendapatkan data gempa";
         }
 
-        String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
-        String time = node.get("Infogempa").get("gempa").get("Jam").asText();
-        String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
-        String depth = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
-
-        String msg = "Telah terjadi gempa pada tanggal "+ date + " pukul " + time + ", dengan pusat gempa berada di "+ locs;
-        double mag =  Double.parseDouble(node.get("Infogempa").get("gempa").get("Magnitude").asText());
-        msg = msg + ". Kekuatan gempa adalah " +mag+ " SR, dengan kedalaman " + depth + ". Berdasarkan zonasi, gempa bumi yang terjadi termasuk ";
-        String epic =  node.get("Infogempa").get("gempa").get("Coordinates").asText();
+        String msg = "Telah terjadi gempa pada tanggal "+ data[0] + " pukul " + data[1] + ", dengan pusat gempa berada di "+ data[2];
+        String epic =  data[5];
         String[] coordinates = epic.split(",");
         double lat = Double.parseDouble(coordinates[0]); 
         double lon = Double.parseDouble(coordinates[1]);
@@ -185,6 +172,8 @@ public class BotMessageHandler {
             * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double deg = Math.toDegrees(c); // convert to degree
+
+        msg = msg + ". Jarak gempa dari lokasi anda adalah sekitar " +Math.round(deg*112)+ " KM. Berdasarkan zonasi, gempa bumi yang terjadi termasuk ";
 
         if ( 0 <= deg && deg < 1 ) {
             msg = msg + "gempa bumi lokal, relatif dari lokasi anda.";
@@ -203,23 +192,16 @@ public class BotMessageHandler {
     }
 
     public String kedalaman(String json) {
-        System.out.println("Received request body: " + json);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node;
+        String[] data;
         try{
-            node = mapper.readTree(json);
+            data = this.dataset(json); 
         }  catch (Exception e) {
             return "gagal mendapatkan data gempa";
         }
-        String date = node.get("Infogempa").get("gempa").get("Tanggal").asText();
-        String time = node.get("Infogempa").get("gempa").get("Jam").asText();
-        String locs = node.get("Infogempa").get("gempa").get("Wilayah").asText();
-        String depth = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
 
-        String msg = "Telah terjadi gempa pada tanggal "+ date + " pukul " + time + ", dengan pusat gempa berada di "+ locs;
-        double mag =  Double.parseDouble(node.get("Infogempa").get("gempa").get("Magnitude").asText());
-        msg = msg + ". Kekuatan gempa adalah " +mag+ " SR, dengan kedalaman " + depth + ". Berdasarkan kedalaman, gempa bumi yang terjadi termasuk ";
-        String deepString = node.get("Infogempa").get("gempa").get("Kedalaman").asText();
+        String msg = "Telah terjadi gempa pada tanggal "+ data[0] + " pukul " + data[1] + ", dengan pusat gempa berada di "+ data[2];
+        msg = msg + ". Kedalaman pusat gempa adalah " + data[3] + ". Berdasarkan kedalaman, gempa bumi yang terjadi termasuk ";
+        String deepString = data[3];
         deepString = deepString.replaceAll("[^0-9]", "");
         double deep =  Double.parseDouble(deepString);
         if (  0 < deep && deep <= 70) {
@@ -246,7 +228,7 @@ public class BotMessageHandler {
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Content-Type", "application/json");
             String inputLine;
-
+            System.out.println("cek "+url);
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

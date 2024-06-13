@@ -2,9 +2,9 @@ package com.telegrambmkgbot;
 
 public class BotMessageObject {
     public String message;
-    public int chatId;
+    public Long chatId;
 
-    public BotMessageObject(String a, int b){
+    public BotMessageObject(String a, Long b){
         this.message = a; 
         this.chatId = b;
     }
